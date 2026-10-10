@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartSpend | Finance Tracker</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+
+            <h2 class="logo">Smart<span>Spend</span></h2>
+
+            <nav>
+                <button class="nav-btn active" data-section="overview">
+                    Overview
+                </button>
+
+                <button class="nav-btn" data-section="transactions">
+                    Transactions
+                </button>
+
+                <button class="nav-btn" data-section="budgets">
+                    Budgets
+                </button>
+
+                <button class="nav-btn" data-section="reports">
+                    Reports
+                </button>
+            </nav>
+
+            <button id="themeToggle" class="theme-btn">
+                🌙 Dark Mode
+            </button>
+
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="topbar">
+
+                <div>
+                    <p class="subtitle">PERSONAL FINANCE</p>
+                    <h1>SmartSpend Dashboard</h1>
+                </div>
+
+                <div class="top-actions">
+
+                    <input type="month" id="monthPicker">
+
+                    <button id="openModal" class="primary-btn">
+                        + Add Transaction
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- OVERVIEW -->
+            <section id="overview" class="page-section">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Overview</h2>
+                        <p>Track your money in one place.</p>
+                    </div>
+
+                    <span id="selectedMonthLabel"></span>
+                </div>
+
+
+                <!-- Summary Cards -->
+                <div class="summary-grid">
+
+                    <article class="summary-card">
+                        <p>Total Income</p>
+                        <h2 id="incomeTotal">₹0.00</h2>
+                    </article>
+
+                    <article class="summary-card">
+                        <p>Total Expenses</p>
+                        <h2 id="expenseTotal">₹0.00</h2>
+                    </article>
+
+                    <article class="summary-card">
+                        <p>Balance</p>
+                        <h2 id="balanceTotal">₹0.00</h2>
+                    </article>
+
+                    <article class="summary-card">
+                        <p>Savings Rate</p>
+                        <h2 id="savingsRate">0%</h2>
+                    </article>
+
+                </div>
+
+
+                <!-- Charts and Budget -->
+                <div class="dashboard-grid">
+
+                    <article class="panel">
+
+                        <h3>Expense Breakdown</h3>
+
+                        <div class="chart-container">
+                            <canvas id="expenseChart"></canvas>
+                            <p id="chartEmpty">
+                                Add expenses to view your chart.
+                            </p>
+                        </div>
+
+                    </article>
+
+
+                    <article class="panel">
+
+                        <h3>Monthly Budget</h3>
+
+                        <div class="budget-info">
+                            <span>Budget Limit</span>
+                            <strong id="budgetLimitLabel">Not set</strong>
+                        </div>
+
+                        <div class="progress-track">
+                            <div id="budgetProgress"></div>
+                        </div>
+
+                        <div class="budget-info">
+                            <span id="budgetSpentLabel">₹0 spent</span>
+                            <span id="budgetRemainingLabel">Set a budget</span>
+                        </div>
+
+                        <form id="budgetForm">
+
+                            <label for="budgetAmount">
+                                Monthly Budget (₹)
+                            </label>
+
+                            <div class="input-row">
+                                <input
+                                    type="number"
+                                    id="budgetAmount"
+                                    min="1"
+                                    step="0.01"
+                                    placeholder="Enter budget"
+                                    required
+                                >
+
+                                <button type="submit" class="secondary-btn">
+                                    Save
+                                </button>
+                            </div>
+
+                        </form>
+
+                        <p id="budgetMessage"></p>
+
+                    </article>
+
+                </div>
+
+
+                <!-- Recent Transactions -->
+                <article class="panel">
+
+                    <div class="panel-heading">
+                        <h3>Recent Transactions</h3>
+
+                        <button
+                            class="text-btn"
+                            data-section="transactions"
+                        >
+                            View All →
+                        </button>
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="recentTableBody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                    <p id="recentEmpty" class="empty-message">
+                        No transactions yet.
+                    </p>
+
+                </article>
+
+            </section>
+
+
+            <!-- TRANSACTIONS -->
+            <section id="transactions" class="page-section hidden">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Transactions</h2>
+                        <p>Search and manage your transactions.</p>
+                    </div>
+
+                    <button class="primary-btn" data-open-modal>
+                        + Add Transaction
+                    </button>
+                </div>
+
+
+                <article class="panel">
+
+                    <div class="filters">
+
+                        <input
+                            type="search"
+                            id="searchInput"
+                            placeholder="Search transactions..."
+                        >
+
+                        <select id="filterType">
+                            <option value="all">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+
+                        <select id="filterCategory">
+                            <option value="all">All Categories</option>
+                            <option>Food</option>
+                            <option>Travel</option>
+                            <option>Shopping</option>
+                            <option>Bills</option>
+                            <option>Education</option>
+                            <option>Salary</option>
+                            <option>Health</option>
+                            <option>Entertainment</option>
+                            <option>Other</option>
+                        </select>
+
+                        <input type="date" id="filterDate">
+
+                        <button id="clearFilters" class="secondary-btn">
+                            Clear
+                        </button>
+
+                        <button id="exportCsv" class="secondary-btn">
+                            Export CSV
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="transactionTableBody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                    <p id="transactionEmpty" class="empty-message">
+                        No matching transactions.
+                    </p>
+
+                </article>
+
+            </section>
+
+
+            <!-- BUDGETS -->
+            <section id="budgets" class="page-section hidden">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Budgets</h2>
+                        <p>Plan your spending for the selected month.</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+
+                    <article class="panel">
+
+                        <h3>Monthly Budget</h3>
+
+                        <h2 id="budgetPageLimit">Not set</h2>
+
+                        <div class="progress-track">
+                            <div id="budgetPageProgress"></div>
+                        </div>
+
+                        <div class="budget-info">
+                            <span id="budgetPageSpent">Spent: ₹0</span>
+                            <span id="budgetPageLeft">Remaining: —</span>
+                        </div>
+
+                        <form id="budgetFormPage">
+
+                            <label for="budgetAmountPage">
+                                Budget Amount (₹)
+                            </label>
+
+                            <div class="input-row">
+
+                                <input
+                                    type="number"
+                                    id="budgetAmountPage"
+                                    min="1"
+                                    step="0.01"
+                                    placeholder="Enter budget"
+                                    required
+                                >
+
+                                <button type="submit" class="primary-btn">
+                                    Save Budget
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                        <p id="budgetPageMessage"></p>
+
+                    </article>
+
+
+                    <article class="panel">
+
+                        <h3>Spending by Category</h3>
+
+                        <div id="categoryBreakdown"></div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- REPORTS -->
+            <section id="reports" class="page-section hidden">
+
+                <div class="section-heading">
+                    <div>
+                        <h2>Monthly Reports</h2>
+                        <p>Understand your income and expenses.</p>
+                    </div>
+
+                    <button id="exportReportCsv" class="secondary-btn">
+                        Export CSV
+                    </button>
+                </div>
+
+
+                <div class="summary-grid">
+
+                    <article class="summary-card">
+                        <p>Income</p>
+                        <h2 id="reportIncome">₹0.00</h2>
+                    </article>
+
+                    <article class="summary-card">
+                        <p>Expenses</p>
+                        <h2 id="reportExpenses">₹0.00</h2>
+                    </article>
+
+                    <article class="summary-card">
+                        <p>Net Balance</p>
+                        <h2 id="reportBalance">₹0.00</h2>
+                    </article>
+
+                    <article class="summary-card">
+                        <p>Transactions</p>
+                        <h2 id="reportCount">0</h2>
+                    </article>
+
+                </div>
+
+
+                <article class="panel">
+
+                    <h3>Financial Summary</h3>
+
+                    <p id="reportSubtitle"></p>
+
+                    <div id="reportInsight" class="report-insight">
+                        Add transactions to generate a report.
+                    </div>
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Transactions</th>
+                                    <th>Total Expenses</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="reportTableBody"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <footer class="footer">
+                SmartSpend · Personal Finance Tracker
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <!-- ADD TRANSACTION MODAL -->
+    <div id="transactionModal" class="modal-backdrop hidden">
+
+        <div class="modal" role="dialog" aria-modal="true">
+
+            <div class="modal-header">
+
+                <div>
+                    <p class="subtitle">NEW ENTRY</p>
+                    <h2>Add Transaction</h2>
+                </div>
+
+                <button id="closeModal" class="close-btn" aria-label="Close">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="transactionForm">
+
+                <label for="description">Description</label>
+
+                <input
+                    type="text"
+                    id="description"
+                    maxlength="80"
+                    placeholder="e.g. Grocery shopping"
+                    required
+                >
+
+
+                <div class="form-grid">
+
+                    <div>
+                        <label for="amount">Amount (₹)</label>
+
+                        <input
+                            type="number"
+                            id="amount"
+                            min="0.01"
+                            step="0.01"
+                            placeholder="0.00"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="type">Type</label>
+
+                        <select id="type">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="form-grid">
+
+                    <div>
+                        <label for="category">Category</label>
+
+                        <select id="category">
+                            <option>Food</option>
+                            <option>Travel</option>
+                            <option>Shopping</option>
+                            <option>Bills</option>
+                            <option>Education</option>
+                            <option>Salary</option>
+                            <option>Health</option>
+                            <option>Entertainment</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="transactionDate">Date</label>
+
+                        <input
+                            type="date"
+                            id="transactionDate"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+
+                <label for="notes">Notes (Optional)</label>
+
+                <textarea
+                    id="notes"
+                    rows="3"
+                    maxlength="200"
+                    placeholder="Add a note..."
+                ></textarea>
+
+
+                <p id="formError" class="form-error hidden"></p>
+
+
+                <div class="modal-actions">
+
+                    <button type="button" id="cancelModal" class="secondary-btn">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="primary-btn">
+                        Save Transaction
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div id="toast" class="toast" role="status"></div>
+
+</body>
+</html>
